@@ -5,14 +5,12 @@ import { Music, Guitar, Plane, Car, MapPin, Calendar, Clock, ChevronDown, Play, 
 const VideoEmbed = ({ videoId, title, start = 0, onFavorite, isFavorite }) => {
   const [showVideo, setShowVideo] = useState(false);
   
-  // FIX: Added enablejsapi=1 which is required when using the origin parameter to prevent Error 153
-  const origin = typeof window !== 'undefined' ? window.location.origin : '';
-  const embedUrl = `https://www.youtube.com/embed/${videoId}?autoplay=1&start=${start}&enablejsapi=1&origin=${origin}`;
+  // Simplified URL - removed origin parameter that caused Error 153
+  const embedUrl = `https://www.youtube.com/embed/${videoId}?autoplay=1&start=${start}`;
   const thumbnailUrl = `https://img.youtube.com/vi/${videoId}/maxresdefault.jpg`;
-
+  
   return (
     <div className="relative group h-full">
-      {/* Thumbnail / Play Button */}
       <div 
         className="relative bg-gray-900 rounded-xl overflow-hidden cursor-pointer aspect-video shadow-lg hover:shadow-xl transition-all"
         onClick={() => setShowVideo(true)}
@@ -32,8 +30,7 @@ const VideoEmbed = ({ videoId, title, start = 0, onFavorite, isFavorite }) => {
           <p className="text-white text-sm font-medium truncate">{title}</p>
         </div>
       </div>
-
-      {/* Favorite Button */}
+      
       {onFavorite && (
         <button 
           onClick={(e) => { e.stopPropagation(); onFavorite(); }}
@@ -43,7 +40,6 @@ const VideoEmbed = ({ videoId, title, start = 0, onFavorite, isFavorite }) => {
         </button>
       )}
       
-      {/* Video Modal */}
       {showVideo && (
         <div className="fixed inset-0 bg-black/95 z-50 flex items-center justify-center p-4 animate-fadeIn" onClick={() => setShowVideo(false)}>
           <div className="relative w-full max-w-5xl aspect-video bg-black rounded-xl overflow-hidden shadow-2xl">
