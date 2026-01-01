@@ -498,7 +498,7 @@ export default function App() {
       <Section id="hero" className="flex items-center pt-16">
         <div className="text-center">
           <div className="inline-block mb-6 px-4 py-2 rounded-full bg-amber-500/20 border border-amber-500/30">
-            <span className="text-amber-400 font-medium">En far-søn oplevelse i funkens tegn</span>
+            <span className="text-amber-400 font-medium">En oplevelse i funkens tegn</span>
           </div>
           
           <h1 className="text-5xl md:text-7xl lg:text-8xl font-black mb-6 tracking-tight">
