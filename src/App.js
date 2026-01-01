@@ -149,7 +149,7 @@ export default function App() {
     if (hasVisited && !isBirthday) {
       setShowSplash(false);
     }
-  }, []);
+  }, [isBirthday]); // <--- FIX: Added isBirthday dependency here
 
   // Save to localStorage
   useEffect(() => {
