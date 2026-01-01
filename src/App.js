@@ -5,8 +5,9 @@ import { Music, Guitar, Plane, Car, MapPin, Calendar, Clock, ChevronDown, Play, 
 const VideoEmbed = ({ videoId, title, start = 0, onFavorite, isFavorite }) => {
   const [showVideo, setShowVideo] = useState(false);
   
-  // Construct embed URL with autoplay and start time
-  const embedUrl = `https://www.youtube.com/embed/${videoId}?autoplay=1&start=${start}`;
+  // FIX: Added window.location.origin to satisfy YouTube's security requirements on live sites
+  const origin = typeof window !== 'undefined' ? window.location.origin : '';
+  const embedUrl = `https://www.youtube.com/embed/${videoId}?autoplay=1&start=${start}&origin=${origin}`;
   const thumbnailUrl = `https://img.youtube.com/vi/${videoId}/maxresdefault.jpg`;
 
   return (
