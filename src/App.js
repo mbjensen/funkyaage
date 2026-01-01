@@ -5,9 +5,9 @@ import { Music, Guitar, Plane, Car, MapPin, Calendar, Clock, ChevronDown, Play, 
 const VideoEmbed = ({ videoId, title, start = 0, onFavorite, isFavorite }) => {
   const [showVideo, setShowVideo] = useState(false);
   
-  // FIX: Added window.location.origin to satisfy YouTube's security requirements on live sites
+  // FIX: Added enablejsapi=1 which is required when using the origin parameter to prevent Error 153
   const origin = typeof window !== 'undefined' ? window.location.origin : '';
-  const embedUrl = `https://www.youtube.com/embed/${videoId}?autoplay=1&start=${start}&origin=${origin}`;
+  const embedUrl = `https://www.youtube.com/embed/${videoId}?autoplay=1&start=${start}&enablejsapi=1&origin=${origin}`;
   const thumbnailUrl = `https://img.youtube.com/vi/${videoId}/maxresdefault.jpg`;
 
   return (
