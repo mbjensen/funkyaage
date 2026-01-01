@@ -5,10 +5,11 @@ import { Music, Guitar, Plane, Car, MapPin, Calendar, Clock, ChevronDown, Play, 
 const VideoEmbed = ({ videoId, title, start = 0, onFavorite, isFavorite }) => {
   const [showVideo, setShowVideo] = useState(false);
   
-  // SIMPLE URL - no origin, no enablejsapi
-  const embedUrl = `https://www.youtube.com/embed/${videoId}?autoplay=1&start=${start}&rel=0`;
+  // FIX: Added window.location.origin to satisfy YouTube's security requirements on live sites
+  const origin = typeof window !== 'undefined' ? window.location.origin : '';
+  const embedUrl = `https://www.youtube.com/embed/${videoId}?autoplay=1&start=${start}&enablejsapi=1&origin=${origin}`;
   const thumbnailUrl = `https://img.youtube.com/vi/${videoId}/maxresdefault.jpg`;
-  
+
   return (
     <div className="relative group h-full">
       {/* Thumbnail / Play Button */}
@@ -41,21 +42,12 @@ const VideoEmbed = ({ videoId, title, start = 0, onFavorite, isFavorite }) => {
           <Heart className={`w-4 h-4 ${isFavorite ? 'text-red-500 fill-red-500' : 'text-white'}`} />
         </button>
       )}
-
+      
       {/* Video Modal */}
       {showVideo && (
-        <div 
-          className="fixed inset-0 bg-black/95 z-50 flex items-center justify-center p-4 animate-fadeIn" 
-          onClick={() => setShowVideo(false)}
-        >
-          <div 
-            className="relative w-full max-w-5xl aspect-video bg-black rounded-xl overflow-hidden shadow-2xl"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <button 
-              className="absolute -top-12 right-0 text-white hover:text-amber-400"
-              onClick={() => setShowVideo(false)}
-            >
+        <div className="fixed inset-0 bg-black/95 z-50 flex items-center justify-center p-4 animate-fadeIn" onClick={() => setShowVideo(false)}>
+          <div className="relative w-full max-w-5xl aspect-video bg-black rounded-xl overflow-hidden shadow-2xl">
+            <button className="absolute -top-12 right-0 text-white hover:text-amber-400">
               <X className="w-8 h-8" />
             </button>
             <iframe
@@ -63,9 +55,10 @@ const VideoEmbed = ({ videoId, title, start = 0, onFavorite, isFavorite }) => {
               title={title}
               className="w-full h-full"
               frameBorder="0"
+              referrerPolicy="strict-origin-when-cross-origin"
               allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
               allowFullScreen
-            />
+            ></iframe>
           </div>
         </div>
       )}
