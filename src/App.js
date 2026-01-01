@@ -1,43 +1,62 @@
 import React, { useState, useEffect } from 'react';
-import { Music, Guitar, Plane, Car, MapPin, Calendar, Clock, ChevronDown, Play, X, Star, Heart, Check, Sun, Menu, ExternalLink, Users, Mic2, Piano, Home, Info, BookOpen, Map, Hotel, FileText, Gift } from 'lucide-react';
+import { Music, Guitar, Plane, Car, MapPin, Calendar, Clock, ChevronDown, Play, X, Star, Heart, Check, Sun, Menu, ExternalLink, Users, Mic2, Piano, Home, Info, BookOpen, Map, Hotel, FileText, Gift, Video, Zap, GraduationCap, Utensils, Droplets, Footprints } from 'lucide-react';
 
-// Video placeholder component
-const VideoEmbed = ({ placeholder, title, onFavorite, isFavorite }) => {
+// Video component that plays actual YouTube videos
+const VideoEmbed = ({ videoId, title, start = 0, onFavorite, isFavorite }) => {
   const [showVideo, setShowVideo] = useState(false);
   
+  // Construct embed URL with autoplay and start time
+  const embedUrl = `https://www.youtube.com/embed/${videoId}?autoplay=1&start=${start}`;
+  const thumbnailUrl = `https://img.youtube.com/vi/${videoId}/maxresdefault.jpg`;
+
   return (
-    <div className="relative group">
+    <div className="relative group h-full">
+      {/* Thumbnail / Play Button */}
       <div 
-        className="relative bg-gradient-to-br from-amber-900/50 to-black rounded-xl overflow-hidden cursor-pointer aspect-video"
+        className="relative bg-gray-900 rounded-xl overflow-hidden cursor-pointer aspect-video shadow-lg hover:shadow-xl transition-all"
         onClick={() => setShowVideo(true)}
       >
+        <img 
+          src={thumbnailUrl} 
+          alt={title}
+          className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity"
+          onError={(e) => { e.target.src = `https://img.youtube.com/vi/${videoId}/hqdefault.jpg` }}
+        />
         <div className="absolute inset-0 flex items-center justify-center">
           <div className="w-16 h-16 bg-amber-500 rounded-full flex items-center justify-center transform group-hover:scale-110 transition-transform shadow-lg">
             <Play className="w-8 h-8 text-black ml-1" fill="black" />
           </div>
         </div>
-        <div className="absolute bottom-0 left-0 right-0 p-3 bg-gradient-to-t from-black/80">
+        <div className="absolute bottom-0 left-0 right-0 p-3 bg-gradient-to-t from-black/90 to-transparent">
           <p className="text-white text-sm font-medium truncate">{title}</p>
         </div>
       </div>
+
+      {/* Favorite Button */}
       {onFavorite && (
         <button 
           onClick={(e) => { e.stopPropagation(); onFavorite(); }}
-          className="absolute top-2 right-2 p-2 rounded-full bg-black/50 hover:bg-black/70 transition-colors"
+          className="absolute top-2 right-2 p-2 rounded-full bg-black/50 hover:bg-black/70 transition-colors z-10"
         >
           <Heart className={`w-4 h-4 ${isFavorite ? 'text-red-500 fill-red-500' : 'text-white'}`} />
         </button>
       )}
       
+      {/* Video Modal */}
       {showVideo && (
-        <div className="fixed inset-0 bg-black/90 z-50 flex items-center justify-center p-4" onClick={() => setShowVideo(false)}>
-          <div className="relative w-full max-w-4xl aspect-video">
+        <div className="fixed inset-0 bg-black/95 z-50 flex items-center justify-center p-4 animate-fadeIn" onClick={() => setShowVideo(false)}>
+          <div className="relative w-full max-w-5xl aspect-video bg-black rounded-xl overflow-hidden shadow-2xl">
             <button className="absolute -top-12 right-0 text-white hover:text-amber-400">
               <X className="w-8 h-8" />
             </button>
-            <div className="w-full h-full bg-gray-900 rounded-lg flex items-center justify-center">
-              <p className="text-gray-400">Video: {placeholder}</p>
-            </div>
+            <iframe
+              src={embedUrl}
+              title={title}
+              className="w-full h-full"
+              frameBorder="0"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+              allowFullScreen
+            ></iframe>
           </div>
         </div>
       )}
@@ -56,7 +75,7 @@ const BandMemberCard = ({ member, featured, onFavoriteVideo, favorites }) => {
         onClick={() => setExpanded(!expanded)}
       >
         <div className="flex items-start gap-4">
-          <div className={`w-20 h-20 rounded-full ${featured ? 'bg-gradient-to-br from-amber-400 to-amber-600' : 'bg-gradient-to-br from-gray-600 to-gray-800'} flex items-center justify-center flex-shrink-0`}>
+          <div className={`w-20 h-20 rounded-full ${featured ? 'bg-gradient-to-br from-amber-400 to-amber-600' : 'bg-gradient-to-br from-gray-600 to-gray-800'} flex items-center justify-center flex-shrink-0 shadow-lg`}>
             {member.icon}
           </div>
           <div className="flex-1">
@@ -80,12 +99,13 @@ const BandMemberCard = ({ member, featured, onFavoriteVideo, favorites }) => {
               <p className="text-amber-400 text-sm"><strong>Fun fact:</strong> {member.funFact}</p>
             </div>
           )}
-          {member.video && (
+          {member.videoId && (
             <VideoEmbed 
-              placeholder={member.video} 
+              videoId={member.videoId}
+              start={member.videoStart}
               title={`${member.name} - ${member.instrument}`}
-              onFavorite={() => onFavoriteVideo(member.video)}
-              isFavorite={favorites.includes(member.video)}
+              onFavorite={() => onFavoriteVideo(member.videoId)}
+              isFavorite={favorites.includes(member.videoId)}
             />
           )}
         </div>
@@ -106,7 +126,7 @@ const Section = ({ id, children, className = "" }) => (
 // Section title component
 const SectionTitle = ({ icon, title, subtitle }) => (
   <div className="text-center mb-12">
-    <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-gradient-to-br from-amber-500 to-amber-700 mb-4">
+    <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-gradient-to-br from-amber-500 to-amber-700 mb-4 shadow-lg shadow-amber-500/20">
       {icon}
     </div>
     <h2 className="text-3xl md:text-4xl font-bold text-white mb-2">{title}</h2>
@@ -118,7 +138,6 @@ const SectionTitle = ({ icon, title, subtitle }) => (
 export default function App() {
   const [showSplash, setShowSplash] = useState(true);
   const [splashPhase, setSplashPhase] = useState(0);
-  // Force dark mode always
   const darkMode = true; 
   const [menuOpen, setMenuOpen] = useState(false);
   const [activeSection, setActiveSection] = useState('hero');
@@ -126,7 +145,8 @@ export default function App() {
   const [checklist, setChecklist] = useState({});
 
   // Check if it's birthday
-  const today = new Date();
+  // const today = new Date(); // Normal date
+  const today = new Date('2026-01-02'); // Force Birthday for testing
   const isBirthday = today.getMonth() === 0 && today.getDate() === 2;
   const birthdayDate = new Date('2026-01-02');
   const concertDate = new Date('2026-07-11');
@@ -149,7 +169,7 @@ export default function App() {
     if (hasVisited && !isBirthday) {
       setShowSplash(false);
     }
-  }, [isBirthday]); // <--- FIX: Added isBirthday dependency here
+  }, [isBirthday]);
 
   // Save to localStorage
   useEffect(() => {
@@ -198,7 +218,7 @@ export default function App() {
   // Scroll spy
   useEffect(() => {
     const handleScroll = () => {
-      const sections = ['hero', 'concert', 'band', 'fearless', 'learn', 'venue', 'travel', 'accommodation', 'practical'];
+      const sections = ['hero', 'concert', 'band', 'live', 'learn', 'venue', 'travel', 'accommodation', 'practical'];
       for (const section of sections) {
         const el = document.getElementById(section);
         if (el) {
@@ -224,7 +244,7 @@ export default function App() {
     { id: 'hero', label: 'Start', icon: <Home className="w-4 h-4" /> },
     { id: 'concert', label: 'Koncerten', icon: <Info className="w-4 h-4" /> },
     { id: 'band', label: 'Bandet', icon: <Users className="w-4 h-4" /> },
-    { id: 'fearless', label: 'Fearless Flyers', icon: <Plane className="w-4 h-4" /> },
+    { id: 'live', label: 'Live', icon: <Video className="w-4 h-4" /> },
     { id: 'learn', label: 'Lær Guitar', icon: <BookOpen className="w-4 h-4" /> },
     { id: 'venue', label: 'Spillested', icon: <MapPin className="w-4 h-4" /> },
     { id: 'travel', label: 'Rejsen', icon: <Map className="w-4 h-4" /> },
@@ -241,7 +261,7 @@ export default function App() {
       shortBio: 'Rhythm guitar virtuoso med den reneste funk tone',
       bio: 'Cory Wong er manden bag den ikoniske perkussive rhythm guitar stil, der definerer Vulfpecks lyd. Hans "chop" teknik og utroligt stramme timing har gjort ham til en af de mest eftertragtede guitarister i moderne funk.',
       funFact: 'Cory er også medlem af The Fearless Flyers og har en solokarriere med over 15 albums.',
-      video: '[CORY_WONG_VIDEO_1]',
+      videoId: 'BtYYnqfb4xw',
       featured: true
     },
     {
@@ -251,7 +271,7 @@ export default function App() {
       shortBio: 'Groovens fundament med minimal setup',
       bio: 'Joe Dart er basisten, der holder hele bandet sammen. Med sin Fender Jazz Bass og minimale pedalboard skaber han nogle af de mest genkendelige baslinjer i moderne musik.',
       funFact: 'Joe bruger ofte kun én bas og ingen pedaler live - bevis på at tone kommer fra fingrene.',
-      video: '[JOE_DART_VIDEO_1]',
+      videoId: 'rhxQoDlt2AU',
       featured: false
     },
     {
@@ -261,7 +281,8 @@ export default function App() {
       shortBio: 'Bandets kreative mastermind og leder',
       bio: 'Jack Stratton er hjernen bag Vulfpeck. Han producerer, komponerer og spiller multiple instrumenter. Hans unikke vision har skabt et af de mest originale bands i moderne musik.',
       funFact: 'Jack skabte "Sleepify" - et album med total stilhed, der indbragte $20,000 fra Spotify før det blev fjernet.',
-      video: '[JACK_STRATTON_VIDEO_1]',
+      videoId: 'rv4wf7bzfFE',
+      videoStart: 6015,
       featured: false
     },
     {
@@ -271,7 +292,7 @@ export default function App() {
       shortBio: 'Lead vokalist og multi-instrumentalist',
       bio: 'Theo Katzman bringer soul og grit til Vulfpecks lyd. Som hovedvokalist på mange af bandets hits og dygtig multi-instrumentalist er han essentiel for bandets live shows.',
       funFact: 'Theo har en succesfuld solokarriere og har udgivet flere kritikerroste albums.',
-      video: '[THEO_KATZMAN_VIDEO_1]',
+      videoId: 'tCO6NwoOo1c',
       featured: false
     },
     {
@@ -281,7 +302,8 @@ export default function App() {
       shortBio: 'Vintage keyboard lyde og groovy hooks',
       bio: 'Woody Goss leverer de klassiske keyboard sounds, der giver Vulfpeck deres retro-moderne æstetik. Fra Wurlitzer til clavinet, hans spil er altid grooving.',
       funFact: 'Woody har sin egen instrumental funk trio ved navn "Woody and Jeremy" (senere "The Woody Goss Band").',
-      video: '[WOODY_GOSS_VIDEO_1]',
+      videoId: 'Ru9ObPeoCwQ',
+      videoStart: 200,
       featured: false
     }
   ];
@@ -293,7 +315,7 @@ export default function App() {
     'Behageligt tøj og sko',
     'Solcreme og solbriller',
     'Regnjakke (for en sikkerheds skyld)',
-    'Kamera',
+    'Mobil',
     'Powerbank',
     'Siddeunderlag (stenene er hårde!)',
     'Vandflaske',
@@ -331,7 +353,6 @@ export default function App() {
                   Tillykke med<br />
                   <span className="text-amber-400">70-års fødselsdagen</span>
                 </h1>
-                <p className="text-2xl text-amber-300">Aage!</p>
               </div>
 
               <div className={`mt-12 transition-all duration-1000 delay-1000 ${splashPhase >= 1 ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
@@ -623,49 +644,42 @@ export default function App() {
         </div>
       </Section>
 
-      {/* Fearless Flyers Section */}
-      <Section id="fearless">
+      {/* Live Concerts Section */}
+      <Section id="live">
         <SectionTitle 
-          icon={<Plane className="w-8 h-8 text-black" />}
-          title="The Fearless Flyers"
-          subtitle="Supergruppen med tre guitarer"
+          icon={<Video className="w-8 h-8 text-black" />}
+          title="Vulfpeck Live"
+          subtitle="Oplev energien fra deres legendariske koncerter"
         />
 
         <div className={`p-6 rounded-2xl ${darkMode ? 'bg-gradient-to-br from-gray-800/50 to-gray-900' : 'bg-white'} mb-6`}>
           <p className={`text-lg ${darkMode ? 'text-gray-300' : 'text-gray-700'} mb-6`}>
-            The Fearless Flyers er et sideprojekt med medlemmer fra Vulfpeck og Snarky Puppy. 
-            Konceptet er unikt: tre guitarer på stativer, pilotuniforms-æstetik, og kompromisløs funk.
+            Vulfpeck er kendt for deres utrolige live-energi, improvisation og publikumsinteraktion. 
+            Her er to ikoniske koncerter, du kan varme op med – inklusive deres seneste optræden i Frankrig!
           </p>
 
-          <div className="grid sm:grid-cols-2 md:grid-cols-4 gap-4">
-            {[
-              { name: 'Cory Wong', role: 'Rhythm Guitar', band: 'Vulfpeck' },
-              { name: 'Mark Lettieri', role: 'Baritone Guitar', band: 'Snarky Puppy' },
-              { name: 'Joe Dart', role: 'Bass', band: 'Vulfpeck' },
-              { name: 'Nate Smith', role: 'Drums', band: 'Kinfolk' }
-            ].map((member, i) => (
-              <div key={i} className={`p-4 rounded-xl ${darkMode ? 'bg-white/5' : 'bg-amber-50'}`}>
-                <p className="font-bold text-amber-500">{member.name}</p>
-                <p className={`text-sm ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>{member.role}</p>
-                <p className={`text-xs ${darkMode ? 'text-gray-500' : 'text-gray-500'}`}>Fra: {member.band}</p>
-              </div>
-            ))}
+          <div className="grid md:grid-cols-2 gap-6">
+            <div>
+              <h3 className="text-xl font-bold text-amber-500 mb-2">Live at Madison Square Garden (2019)</h3>
+              <p className="text-gray-400 mb-3 text-sm">Den legendariske koncert hvor de solgte MSG ud uden et pladeselskab.</p>
+              <VideoEmbed 
+                videoId="rv4wf7bzfFE" 
+                title="Vulfpeck Live at MSG"
+                onFavorite={() => toggleFavorite('rv4wf7bzfFE')}
+                isFavorite={favorites.includes('rv4wf7bzfFE')}
+              />
+            </div>
+            <div>
+              <h3 className="text-xl font-bold text-amber-500 mb-2">Live at Jazz à Vienne (2024)</h3>
+              <p className="text-gray-400 mb-3 text-sm">En forsmag på hvad der venter dig! Hele koncerten fra samme festival.</p>
+              <VideoEmbed 
+                videoId="0ZL2q9hBPwU" 
+                title="Vulfpeck - Jazz à Vienne 2024"
+                onFavorite={() => toggleFavorite('0ZL2q9hBPwU')}
+                isFavorite={favorites.includes('0ZL2q9hBPwU')}
+              />
+            </div>
           </div>
-        </div>
-
-        <div className="grid md:grid-cols-2 gap-4">
-          <VideoEmbed 
-            placeholder="[FEARLESS_FLYERS_VIDEO_1]" 
-            title="The Fearless Flyers - Live Performance"
-            onFavorite={() => toggleFavorite('[FEARLESS_FLYERS_VIDEO_1]')}
-            isFavorite={favorites.includes('[FEARLESS_FLYERS_VIDEO_1]')}
-          />
-          <VideoEmbed 
-            placeholder="[FEARLESS_FLYERS_VIDEO_2]" 
-            title="The Fearless Flyers - Studio Session"
-            onFavorite={() => toggleFavorite('[FEARLESS_FLYERS_VIDEO_2]')}
-            isFavorite={favorites.includes('[FEARLESS_FLYERS_VIDEO_2]')}
-          />
         </div>
       </Section>
 
@@ -674,107 +688,183 @@ export default function App() {
         <SectionTitle 
           icon={<Guitar className="w-8 h-8 text-black" />}
           title="Lær at Spille som Cory Wong"
-          subtitle="Guitar-ressourcer til dig"
+          subtitle="Fra Woodstock til Wong: Et kursus til Far"
         />
 
-        <div className="space-y-6">
-          {/* Fundamentals */}
-          <div className={`p-6 rounded-2xl ${darkMode ? 'bg-white/5' : 'bg-white'}`}>
-            <h3 className="text-xl font-bold mb-4 flex items-center gap-2">
-              <span className="w-8 h-8 rounded-full bg-amber-500 text-black flex items-center justify-center font-bold">1</span>
-              Grundlæggende Teknik
+        <div className="space-y-12">
+          
+          {/* Introduction */}
+          <div className={`p-8 rounded-2xl bg-gradient-to-br ${darkMode ? 'from-amber-900/40 to-black' : 'from-amber-100 to-white'} border-l-4 border-amber-500 shadow-lg`}>
+            <h3 className="text-2xl font-bold mb-4 text-white flex items-center gap-2">
+              <Guitar className="w-6 h-6 text-amber-500" />
+              Den Store Udfordring
             </h3>
-            <p className={`mb-4 ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>
-              Cory Wongs spillestil bygger på perfekt timing og en unik højrehånds-teknik. 
-              Start med at mestre grundlæggende rhythm guitar og strumming patterns.
+            <p className={`${darkMode ? 'text-gray-300' : 'text-gray-700'} text-lg leading-relaxed`}>
+              I 60'er rocken (som Hendrix) er guitaren <strong>heroisk</strong> – den fylder rummet. 
+              I funk er guitaren <strong>ydmyg</strong> – den er en del af rytmesektionen.
+              <br/><br/>
+              <span className="text-amber-400 italic font-medium">Målet er ikke at spille guitar igen. Målet er at "spille trommer på guitaren".</span>
             </p>
-            <div className="grid md:grid-cols-2 gap-4">
+          </div>
+
+          {/* Phase 1: The Masterclass */}
+          <div>
+            <div className="flex items-center gap-3 mb-4">
+              <span className="flex items-center justify-center w-8 h-8 rounded-full bg-amber-500 text-black font-bold">1</span>
+              <h3 className="text-2xl font-bold text-amber-500">Start Her: Vulfpeck Lyden</h3>
+            </div>
+            <div className={`p-6 rounded-2xl ${darkMode ? 'bg-gray-900' : 'bg-white'}`}>
+              <p className="text-gray-300 mb-4">
+                En times masterclass hvor Cory forklarer hele sin filosofi, sit grej og sin teknik. Det føles som en premium lektion, men den er gratis.
+              </p>
               <VideoEmbed 
-                placeholder="[CORY_TECHNIQUE_VIDEO_1]" 
-                title="Right Hand Technique Basics"
-                onFavorite={() => toggleFavorite('[CORY_TECHNIQUE_VIDEO_1]')}
-                isFavorite={favorites.includes('[CORY_TECHNIQUE_VIDEO_1]')}
-              />
-              <VideoEmbed 
-                placeholder="[CORY_TECHNIQUE_VIDEO_2]" 
-                title="Rhythm Guitar Fundamentals"
-                onFavorite={() => toggleFavorite('[CORY_TECHNIQUE_VIDEO_2]')}
-                isFavorite={favorites.includes('[CORY_TECHNIQUE_VIDEO_2]')}
+                videoId="EMqRS1wYbNs" 
+                title="Rhythm Guitar Masterclass with Cory Wong"
+                onFavorite={() => toggleFavorite('EMqRS1wYbNs')}
+                isFavorite={favorites.includes('EMqRS1wYbNs')}
               />
             </div>
           </div>
 
-          {/* Signature Moves */}
-          <div className={`p-6 rounded-2xl ${darkMode ? 'bg-white/5' : 'bg-white'}`}>
-            <h3 className="text-xl font-bold mb-4 flex items-center gap-2">
-              <span className="w-8 h-8 rounded-full bg-amber-500 text-black flex items-center justify-center font-bold">2</span>
-              Cory Wong's Signatur Moves
-            </h3>
-            <ul className={`mb-4 space-y-2 ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>
-              <li className="flex items-center gap-2">
-                <Check className="w-4 h-4 text-amber-500" />
-                The "chop" technique - muted strumming
-              </li>
-              <li className="flex items-center gap-2">
-                <Check className="w-4 h-4 text-amber-500" />
-                Perkussiv højrehånd
-              </li>
-              <li className="flex items-center gap-2">
-                <Check className="w-4 h-4 text-amber-500" />
-                9th og 13th chord voicings
-              </li>
-            </ul>
-            <div className="grid md:grid-cols-2 gap-4">
+          {/* Module 1 & 2 */}
+          <div className="grid md:grid-cols-2 gap-6">
+            
+            {/* Module 1: Right Hand */}
+            <div className={`p-6 rounded-2xl ${darkMode ? 'bg-gray-800' : 'bg-white'}`}>
+              <div className="flex items-center gap-2 mb-3">
+                <Zap className="w-5 h-5 text-amber-500" />
+                <h3 className="text-xl font-bold">Værkstedet: Højre Hånd</h3>
+              </div>
+              <div className="">
+                <h4 className="font-bold text-sm text-gray-300 mb-2">Øvelse: The Rubber Wrist Technique</h4>
+                <p className="text-gray-400 mb-4 text-sm italic">
+                "Denne lektion handler om at gøre din højre hånd til en trommestik. Cory forklarer, hvordan man holder hånden i konstant bevægelse – hemmeligheden bag aldrig at tabe tempoet. Læg mærke til hans løse håndled; det handler ikke om kraft, men om flow."
+              </p>
               <VideoEmbed 
-                placeholder="[CORY_SIGNATURE_VIDEO_1]" 
-                title="The Cory Wong Chop"
-                onFavorite={() => toggleFavorite('[CORY_SIGNATURE_VIDEO_1]')}
-                isFavorite={favorites.includes('[CORY_SIGNATURE_VIDEO_1]')}
+                videoId="yOTGNW7-E4U" 
+                title="The Rubber Wrist Technique"
+                onFavorite={() => toggleFavorite('yOTGNW7-E4U')}
+                isFavorite={favorites.includes('yOTGNW7-E4U')}
               />
-              <VideoEmbed 
-                placeholder="[CORY_SIGNATURE_VIDEO_2]" 
-                title="Funk Chord Voicings"
-                onFavorite={() => toggleFavorite('[CORY_SIGNATURE_VIDEO_2]')}
-                isFavorite={favorites.includes('[CORY_SIGNATURE_VIDEO_2]')}
-              />
+              </div>
+              <div className="mt-4 pt-4">
+                <h4 className="font-bold text-sm text-gray-300 mb-2">Øvelse: "The Trap"</h4>
+                <p className="text-xs text-gray-500 mb-2">En øvelse fra hans workshop der isolerer håndleddet.</p>
+                <VideoEmbed 
+                  videoId="APHHNG_hYm0" 
+                  title="Practice Workshop (Start at 0:55)"
+                  start={55}
+                  onFavorite={() => toggleFavorite('APHHNG_hYm0')}
+                  isFavorite={favorites.includes('APHHNG_hYm0')}
+                />
+              </div>
             </div>
-          </div>
 
-          {/* Songs to Practice */}
-          <div className={`p-6 rounded-2xl ${darkMode ? 'bg-white/5' : 'bg-white'}`}>
-            <h3 className="text-xl font-bold mb-4 flex items-center gap-2">
-              <span className="w-8 h-8 rounded-full bg-amber-500 text-black flex items-center justify-center font-bold">3</span>
-              Sange at Øve
-            </h3>
-            <div className="grid sm:grid-cols-2 gap-3">
-              {[
-                { title: 'Dean Town', artist: 'Vulfpeck', difficulty: 2 },
-                { title: '1612', artist: 'Vulfpeck', difficulty: 1 },
-                { title: 'Cory Wong', artist: 'Vulfpeck', difficulty: 2 },
-                { title: 'Beastly', artist: 'Vulfpeck', difficulty: 3 },
-                { title: 'Lunchmoney', artist: 'Vulfpeck', difficulty: 2 },
-                { title: 'Birds of a Feather', artist: 'Vulfpeck', difficulty: 1 }
-              ].map((song, i) => (
-                <div key={i} className={`flex items-center justify-between p-3 rounded-lg ${darkMode ? 'bg-white/5' : 'bg-amber-50'}`}>
-                  <div>
-                    <p className="font-medium">{song.title}</p>
-                    <p className={`text-sm ${darkMode ? 'text-gray-500' : 'text-gray-600'}`}>{song.artist}</p>
-                  </div>
-                  <div className="flex">
-                    {[1, 2, 3].map((star) => (
-                      <Star 
-                        key={star} 
-                        className={`w-4 h-4 ${star <= song.difficulty ? 'text-amber-500' : darkMode ? 'text-gray-700' : 'text-gray-300'}`}
-                        fill={star <= song.difficulty ? 'currentColor' : 'none'}
-                      />
-                    ))}
-                  </div>
+            {/* Module 2: Left Hand */}
+            <div className={`p-6 rounded-2xl ${darkMode ? 'bg-gray-800' : 'bg-white'}`}>
+              <div className="flex items-center gap-2 mb-3">
+                <GraduationCap className="w-5 h-5 text-amber-500" />
+                <h3 className="text-xl font-bold">Den Harmoniske Bro</h3>
+              </div>
+              <p className="text-gray-400 mb-4 text-sm italic">
+                "I 60'erne skulle man fylde hele rummet med lyd. I Vulfpeck fylder bassisten (Joe Dart) det hele, så guitaren skal holde sig væk. Brug 'The Hendrix Thumb' til at dæmpe de dybe strenge. Spil 'små' akkorder der groover hårdere end de store."
+              </p>
+              
+              <div className="space-y-4">
+                <div>
+                  <h4 className="font-bold text-sm text-amber-400 mb-1">James Brown Akkorden (E9)</h4>
+                  <VideoEmbed 
+                    videoId="DdVkSxZ52eE" 
+                    title="The James Brown Chord Explained"
+                    onFavorite={() => toggleFavorite('DdVkSxZ52eE')}
+                    isFavorite={favorites.includes('DdVkSxZ52eE')}
+                  />
                 </div>
-              ))}
+                <div className="mt-4 pt-8"></div>
+                <div>
+                  <h4 className="font-bold text-sm text-amber-400 mb-1">Kun 3 strenge (Triads)</h4>
+                  <VideoEmbed 
+                    videoId="jTo1B7ceIWo" 
+                    title="Funk Rhythm Lesson"
+                    onFavorite={() => toggleFavorite('jTo1B7ceIWo')}
+                    isFavorite={favorites.includes('jTo1B7ceIWo')}
+                  />
+                </div>
+              </div>
             </div>
           </div>
 
-          {/* Fourth Position Academy */}
+          {/* Module 3: Songs */}
+          <div>
+            <div className="flex items-center gap-3 mb-4">
+              <span className="flex items-center justify-center w-8 h-8 rounded-full bg-amber-500 text-black font-bold">2</span>
+              <h3 className="text-2xl font-bold text-amber-500">Sætlisten: Sange til Koncerten</h3>
+            </div>
+            
+            <div className="grid md:grid-cols-2 gap-6">
+              {/* Dean Town */}
+              <div className={`p-4 rounded-xl ${darkMode ? 'bg-white/5' : 'bg-white'}`}>
+                <h4 className="text-lg font-bold text-white mb-1">Dean Town</h4>
+                <p className="text-amber-400 text-sm font-bold mb-2">PUBLIKUMS FAVORITTEN</p>
+                <p className="text-gray-400 text-sm mb-3 italic">
+                  "Du behøver ikke spille melodien – det klarer Joe Dart. Dit job er at være lilletrommen. Korte, stramme hug på 2 og 4."
+                </p>
+                <VideoEmbed 
+                  videoId="FF3Oyu9tCII" 
+                  title="Dean Town Guitar Tutorial"
+                  onFavorite={() => toggleFavorite('FF3Oyu9tCII')}
+                  isFavorite={favorites.includes('FF3Oyu9tCII')}
+                />
+              </div>
+
+              {/* Cory Wong */}
+              <div className={`p-4 rounded-xl ${darkMode ? 'bg-white/5' : 'bg-white'}`}>
+                <h4 className="text-lg font-bold text-white mb-1">Cory Wong</h4>
+                <p className="text-amber-400 text-sm font-bold mb-2">UDHOLDENHEDS TESTEN</p>
+                <p className="text-gray-400 text-sm mb-3 italic">
+                  "Sangen de ofte slutter med. Det er et marathon for højre hånd. Start med 50% hastighed!"
+                </p>
+                <VideoEmbed 
+                  videoId="-Qkm20HtEmA" 
+                  title="Cory Wong (Live at MSG) Lesson"
+                  onFavorite={() => toggleFavorite('-Qkm20HtEmA')}
+                  isFavorite={favorites.includes('-Qkm20HtEmA')}
+                />
+              </div>
+
+              {/* 1612 */}
+              <div className={`p-4 rounded-xl ${darkMode ? 'bg-white/5' : 'bg-white'}`}>
+                <h4 className="text-lg font-bold text-white mb-1">1612</h4>
+                <p className="text-amber-400 text-sm font-bold mb-2">SOUL STANDARDEN</p>
+                <p className="text-gray-400 text-sm mb-3 italic">
+                  "Denne føles som en Jackson 5 sang. Den har det klassiske soul swing. Brug tommelfingeren til at dæmpe ligesom Jimi ville gøre."
+                </p>
+                <VideoEmbed 
+                  videoId="drorB6DbZIk" 
+                  title="1612 Guitar Lesson"
+                  onFavorite={() => toggleFavorite('drorB6DbZIk')}
+                  isFavorite={favorites.includes('drorB6DbZIk')}
+                />
+              </div>
+
+              {/* Animal Spirits */}
+              <div className={`p-4 rounded-xl ${darkMode ? 'bg-white/5' : 'bg-white'}`}>
+                <h4 className="text-lg font-bold text-white mb-1">Animal Spirits</h4>
+                <p className="text-amber-400 text-sm font-bold mb-2">POP FUNK</p>
+                <p className="text-gray-400 text-sm mb-3 italic">
+                  "Her skal guitaren lyde som et rasleæg (shaker). Hurtig strumming med lav volumen der skaber tekstur."
+                </p>
+                <VideoEmbed 
+                  videoId="LOQZRafZPOc" 
+                  title="Animal Spirits Tutorial"
+                  onFavorite={() => toggleFavorite('LOQZRafZPOc')}
+                  isFavorite={favorites.includes('LOQZRafZPOc')}
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* Fourth Position Academy Link */}
           <div className={`p-6 rounded-2xl bg-gradient-to-br ${darkMode ? 'from-amber-900/30 to-amber-950/50' : 'from-amber-100 to-amber-200'} border ${darkMode ? 'border-amber-500/30' : 'border-amber-300'}`}>
             <div className="flex items-start gap-4">
               <div className="w-12 h-12 rounded-full bg-amber-500 flex items-center justify-center flex-shrink-0">
@@ -784,15 +874,17 @@ export default function App() {
                 <span className="text-xs font-bold text-amber-500 uppercase tracking-wider">Næste Niveau</span>
                 <h3 className="text-xl font-bold mt-1">Fourth Position Academy</h3>
                 <p className={`mt-2 ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>
-                  Cory Wongs officielle online kursus ($175) inkluderer alt hvad du behøver for at mestre hans spillestil:
+                  Har du fået blod på tanden efter videoerne?
                 </p>
-                <ul className={`mt-3 space-y-1 text-sm ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>
-                  <li>• 1-times Practice Workshops</li>
-                  <li>• Rhythm Guitar Primer</li>
-                  <li>• The Right Hand technique</li>
-                  <li>• Chord Voicings & Principles of Practice</li>
-                  <li>• Guitar Tabs inkluderet</li>
-                </ul>
+                <div className="mt-3 p-3 bg-amber-500/20 border border-amber-500/40 rounded-lg">
+                  <p className="text-amber-400 font-bold flex items-center gap-2">
+                    <Gift className="w-4 h-4" />
+                    En del af gaven
+                  </p>
+                  <p className="text-sm text-gray-300 mt-1">
+                    Hvis du ønsker adgang til det fulde kursus, så siger du bare til. Det betaler jeg med glæde som en udvidelse af din gave! 🎁
+                  </p>
+                </div>
                 <a 
                   href="https://www.fourthpositionacademy.com/" 
                   target="_blank" 
@@ -802,9 +894,6 @@ export default function App() {
                   Besøg Fourth Position Academy
                   <ExternalLink className="w-4 h-4" />
                 </a>
-                <p className={`mt-3 text-xs ${darkMode ? 'text-gray-500' : 'text-gray-600'}`}>
-                  💡 Hvis du vil tage dit Cory Wong-spil til næste niveau, kan dette kursus være en mulighed.
-                </p>
               </div>
             </div>
           </div>
@@ -820,8 +909,18 @@ export default function App() {
         />
 
         <div className={`p-6 rounded-2xl ${darkMode ? 'bg-white/5' : 'bg-white'} mb-6`}>
-          <div className="aspect-video rounded-xl bg-gradient-to-br from-amber-900/30 to-gray-900 flex items-center justify-center mb-6">
-            <p className="text-gray-500">[VENUE_IMAGE_1] - Théâtre Antique panorama</p>
+          <div className="aspect-video rounded-xl bg-gradient-to-br from-amber-900/30 to-gray-900 flex items-center justify-center mb-6 overflow-hidden">
+            {/* Using a standard Google Maps Embed for the location (Public) - HYBRID MODE */}
+            <iframe 
+              src="https://maps.google.com/maps?q=Théâtre+Antique+de+Vienne&t=h&z=17&ie=UTF8&iwloc=&output=embed" 
+              width="100%" 
+              height="100%" 
+              style={{border:0}} 
+              allowFullScreen="" 
+              loading="lazy" 
+              referrerPolicy="no-referrer-when-downgrade"
+              title="Théâtre Antique de Vienne Map"
+            ></iframe>
           </div>
           
           <h3 className="text-xl font-bold mb-3">Et 2000 år gammelt amfiteater</h3>
@@ -871,73 +970,116 @@ export default function App() {
         <SectionTitle 
           icon={<Plane className="w-8 h-8 text-black" />}
           title="Rejsen"
-          subtitle="Fra Aalborg til Vienne"
+          subtitle="Fly fra Hamborg eller Amsterdam?"
         />
 
-        <div className="space-y-6">
-          {/* Fly fra Hamburg */}
+        <div className="space-y-8">
+          
+          {/* Option A: Hamburg */}
           <div className={`p-6 rounded-2xl ${darkMode ? 'bg-white/5' : 'bg-white'}`}>
-            <div className="flex items-center gap-3 mb-4">
+            <div className="flex items-center gap-3 mb-6">
               <div className="w-10 h-10 rounded-full bg-blue-500 flex items-center justify-center">
                 <Plane className="w-5 h-5 text-white" />
               </div>
-              <div>
-                <h3 className="text-xl font-bold">Option A: Fly fra Hamborg</h3>
-                <p className={`text-sm ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>HAM → LYS · ~1,5 timer</p>
-              </div>
+              <h3 className="text-2xl font-bold">Option A: Fly fra Hamborg (HAM)</h3>
             </div>
-            <p className={`mb-4 ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>
-              Kør til Hamborg Lufthavn og flyv direkte til Lyon. Lyon ligger kun 30 km fra Vienne.
-            </p>
-            <div className="flex flex-wrap gap-2">
-              <a href="https://www.google.com/travel/flights?q=Flights%20to%20LYS%20from%20HAM%20on%202026-07-10%20through%202026-07-12" target="_blank" rel="noopener noreferrer" className="px-4 py-2 bg-amber-500 text-black font-medium rounded-lg hover:bg-amber-400 transition-colors inline-flex items-center gap-2">
-                Google Flights <ExternalLink className="w-4 h-4" />
-              </a>
-              <a href="https://www.momondo.dk/flight-search/HAM-LYS/2026-07-10/2026-07-12" target="_blank" rel="noopener noreferrer" className={`px-4 py-2 ${darkMode ? 'bg-white/10 hover:bg-white/20' : 'bg-gray-200 hover:bg-gray-300'} font-medium rounded-lg transition-colors inline-flex items-center gap-2`}>
-                Momondo <ExternalLink className="w-4 h-4" />
-              </a>
-              <a href="https://www.skyscanner.dk/transport/flights/ham/lys/260710/260712/" target="_blank" rel="noopener noreferrer" className={`px-4 py-2 ${darkMode ? 'bg-white/10 hover:bg-white/20' : 'bg-gray-200 hover:bg-gray-300'} font-medium rounded-lg transition-colors inline-flex items-center gap-2`}>
-                Skyscanner <ExternalLink className="w-4 h-4" />
-              </a>
+
+            <div className="space-y-6">
+              {/* Option A1 */}
+              <div className={`p-4 rounded-xl ${darkMode ? 'bg-black/20' : 'bg-gray-50'}`}>
+                <h4 className="font-bold text-lg mb-2">1. Fredag d. 10. Juli - Søndag d. 12. Juli</h4>
+                <div className="flex flex-col sm:flex-row gap-4 mb-3">
+                  <div className="flex-1">
+                    <p className="text-sm text-gray-400">Udrejse</p>
+                    <p className="font-medium">HAM → LYS (10. Juli)</p>
+                  </div>
+                  <div className="flex-1">
+                    <p className="text-sm text-gray-400">Hjemrejse</p>
+                    <p className="font-medium">LYS → HAM (12. Juli)</p>
+                  </div>
+                </div>
+                <div className="inline-block px-3 py-1 bg-amber-500/20 text-amber-400 text-xs font-bold rounded mb-4">
+                  💡 Tip: Vælg afgang efter kl. 20:00 (ud) og efter kl. 14:00 (hjem)
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  <a href="https://www.google.com/travel/flights?q=Flights%20to%20LYS%20from%20HAM%20on%202026-07-10%20through%202026-07-12" target="_blank" rel="noopener noreferrer" className="px-3 py-2 bg-amber-500 text-black text-sm font-medium rounded hover:bg-amber-400 transition-colors">Google Flights ↗</a>
+                  <a href="https://www.momondo.dk/flight-search/HAM-LYS/2026-07-10/2026-07-12" target="_blank" rel="noopener noreferrer" className={`px-3 py-2 ${darkMode ? 'bg-white/10 hover:bg-white/20' : 'bg-gray-200'} text-sm font-medium rounded transition-colors`}>Momondo ↗</a>
+                  <a href="https://www.skyscanner.dk/transport/flights/ham/lys/260710/260712" target="_blank" rel="noopener noreferrer" className={`px-3 py-2 ${darkMode ? 'bg-white/10 hover:bg-white/20' : 'bg-gray-200'} text-sm font-medium rounded transition-colors`}>Skyscanner ↗</a>
+                </div>
+              </div>
+
+              {/* Option A2 */}
+              <div className={`p-4 rounded-xl ${darkMode ? 'bg-black/20' : 'bg-gray-50'}`}>
+                <h4 className="font-bold text-lg mb-2">2. Lørdag d. 11. Juli - Søndag d. 12. Juli</h4>
+                <div className="flex flex-col sm:flex-row gap-4 mb-3">
+                  <div className="flex-1">
+                    <p className="text-sm text-gray-400">Udrejse</p>
+                    <p className="font-medium">HAM → LYS (11. Juli)</p>
+                  </div>
+                  <div className="flex-1">
+                    <p className="text-sm text-gray-400">Hjemrejse</p>
+                    <p className="font-medium">LYS → HAM (12. Juli)</p>
+                  </div>
+                </div>
+                <div className="inline-block px-3 py-1 bg-amber-500/20 text-amber-400 text-xs font-bold rounded mb-4">
+                  💡 Tip: Vælg tidlig morgenafgang før kl. 10:00 (ud)
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  <a href="https://www.google.com/travel/flights?q=Flights%20to%20LYS%20from%20HAM%20on%202026-07-11%20through%202026-07-12" target="_blank" rel="noopener noreferrer" className="px-3 py-2 bg-amber-500 text-black text-sm font-medium rounded hover:bg-amber-400 transition-colors">Google Flights ↗</a>
+                  <a href="https://www.momondo.dk/flight-search/HAM-LYS/2026-07-11/2026-07-12" target="_blank" rel="noopener noreferrer" className={`px-3 py-2 ${darkMode ? 'bg-white/10 hover:bg-white/20' : 'bg-gray-200'} text-sm font-medium rounded transition-colors`}>Momondo ↗</a>
+                  <a href="https://www.skyscanner.dk/transport/flights/ham/lys/260711/260712" target="_blank" rel="noopener noreferrer" className={`px-3 py-2 ${darkMode ? 'bg-white/10 hover:bg-white/20' : 'bg-gray-200'} text-sm font-medium rounded transition-colors`}>Skyscanner ↗</a>
+                </div>
+              </div>
             </div>
           </div>
 
-          {/* Fly fra Amsterdam */}
+          {/* Option B: Amsterdam */}
           <div className={`p-6 rounded-2xl ${darkMode ? 'bg-white/5' : 'bg-white'}`}>
-            <div className="flex items-center gap-3 mb-4">
+            <div className="flex items-center gap-3 mb-6">
               <div className="w-10 h-10 rounded-full bg-orange-500 flex items-center justify-center">
                 <Plane className="w-5 h-5 text-white" />
               </div>
-              <div>
-                <h3 className="text-xl font-bold">Option B: Fly fra Amsterdam</h3>
-                <p className={`text-sm ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>AMS → LYS · Flere afgange</p>
-              </div>
+              <h3 className="text-2xl font-bold">Option B: Fly fra Amsterdam (AMS)</h3>
             </div>
-            <p className={`mb-4 ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>
-              Amsterdam har ofte flere flymuligheder og kan være et godt alternativ.
-            </p>
-            <div className="flex flex-wrap gap-2">
-              <a href="https://www.google.com/travel/flights?q=Flights%20to%20LYS%20from%20AMS%20on%202026-07-10%20through%202026-07-12" target="_blank" rel="noopener noreferrer" className="px-4 py-2 bg-amber-500 text-black font-medium rounded-lg hover:bg-amber-400 transition-colors inline-flex items-center gap-2">
-                Google Flights <ExternalLink className="w-4 h-4" />
-              </a>
+
+            <div className={`p-4 rounded-xl ${darkMode ? 'bg-black/20' : 'bg-gray-50'}`}>
+              <h4 className="font-bold text-lg mb-2">Lørdag d. 11. Juli - Søndag d. 12. Juli</h4>
+              <div className="flex flex-col sm:flex-row gap-4 mb-3">
+                <div className="flex-1">
+                  <p className="text-sm text-gray-400">Udrejse</p>
+                  <p className="font-medium">AMS → LYS (11. Juli)</p>
+                </div>
+                <div className="flex-1">
+                  <p className="text-sm text-gray-400">Hjemrejse</p>
+                  <p className="font-medium">LYS → AMS (12. Juli)</p>
+                </div>
+              </div>
+              <div className="inline-block px-3 py-1 bg-amber-500/20 text-amber-400 text-xs font-bold rounded mb-4">
+                💡 Tip: Vælg tidlig morgenafgang før kl. 10:00 (ud) og hjem efter kl. 14:00
+              </div>
+              <div className="flex flex-wrap gap-2">
+                <a href="https://www.google.com/travel/flights?q=Flights%20to%20LYS%20from%20AMS%20on%202026-07-11%20through%202026-07-12" target="_blank" rel="noopener noreferrer" className="px-3 py-2 bg-amber-500 text-black text-sm font-medium rounded hover:bg-amber-400 transition-colors">Google Flights ↗</a>
+                <a href="https://www.momondo.dk/flight-search/AMS-LYS/2026-07-11/2026-07-12" target="_blank" rel="noopener noreferrer" className={`px-3 py-2 ${darkMode ? 'bg-white/10 hover:bg-white/20' : 'bg-gray-200'} text-sm font-medium rounded transition-colors`}>Momondo ↗</a>
+                <a href="https://www.skyscanner.dk/transport/flights/ams/lys/260711/260712" target="_blank" rel="noopener noreferrer" className={`px-3 py-2 ${darkMode ? 'bg-white/10 hover:bg-white/20' : 'bg-gray-200'} text-sm font-medium rounded transition-colors`}>Skyscanner ↗</a>
+              </div>
             </div>
           </div>
 
-          {/* Kør selv */}
+          {/* Option C: Kør selv */}
           <div className={`p-6 rounded-2xl ${darkMode ? 'bg-white/5' : 'bg-white'}`}>
             <div className="flex items-center gap-3 mb-4">
               <div className="w-10 h-10 rounded-full bg-green-500 flex items-center justify-center">
                 <Car className="w-5 h-5 text-white" />
               </div>
               <div>
-                <h3 className="text-xl font-bold">Option C: Kør selv</h3>
-                <p className={`text-sm ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>~1.400 km · 14 timers kørsel</p>
+                <h3 className="text-xl font-bold">Option C: Kør selv (fra Vojens)</h3>
+                <p className={`text-sm ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>~1.412 km · 13,5 timers kørsel</p>
               </div>
             </div>
             <p className={`mb-4 ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>
-              Ligesom turen til Luxembourg! Mulighed for overnatning undervejs i f.eks. Frankfurt eller Stuttgart.
+              Direkte fra Vojens til Maison Mori i Vienne. En smuk tur ned gennem Tyskland og Frankrig.
             </p>
-            <a href="https://www.google.com/maps/dir/Aalborg,+Denmark/Vienne,+France" target="_blank" rel="noopener noreferrer" className="px-4 py-2 bg-amber-500 text-black font-medium rounded-lg hover:bg-amber-400 transition-colors inline-flex items-center gap-2">
+            <a href="https://www.google.com/maps/dir/Vojens,+Denmark/Maison+Mori,+611+Chemin+du+Boucon,+Vienne,+France/data=!4m14!4m13!1m5!1m1!19sChIJc2F2Zt5VS0YR9okesQ8k4BE!2m2!1d9.3019649!2d55.249489!1m5!1m1!19sChIJpabF8Vjf9EcReaWRXg5Mf3U!2m2!1d4.8835269!2d45.5415537!3e0" target="_blank" rel="noopener noreferrer" className="px-4 py-2 bg-amber-500 text-black font-medium rounded-lg hover:bg-amber-400 transition-colors inline-flex items-center gap-2">
               Se rute på Google Maps <ExternalLink className="w-4 h-4" />
             </a>
           </div>
@@ -977,43 +1119,110 @@ export default function App() {
         <SectionTitle 
           icon={<Hotel className="w-8 h-8 text-black" />}
           title="Overnatning"
-          subtitle="Hoteller i Vienne og Lyon"
+          subtitle="Jeres base i Vienne"
         />
 
-        <p className={`mb-6 ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>
-          Book i god tid - Jazz à Vienne er populær og hotellerne fyldes hurtigt!
-        </p>
+        <div className="mb-8">
+          <div className={`relative p-6 rounded-2xl border-2 border-amber-500 overflow-hidden ${darkMode ? 'bg-gray-800' : 'bg-white'}`}>
+            <div className="absolute top-0 right-0 bg-amber-500 text-black font-bold px-4 py-1 rounded-bl-xl shadow-lg z-10">
+              BOOKET & KLAR
+            </div>
+            
+            <div className="flex flex-col md:flex-row gap-6">
+              <div className="flex-1">
+                <h3 className="text-2xl font-bold mb-2">Maison Mori</h3>
+                <div className="flex items-center gap-1 mb-4">
+                  {[1, 2, 3, 4, 5].map((s) => (
+                    <Star key={s} className="w-4 h-4 text-amber-500 fill-current" />
+                  ))}
+                  <span className="ml-2 text-sm text-gray-400">(9.2 Superb)</span>
+                </div>
+                
+                <p className={`${darkMode ? 'text-gray-300' : 'text-gray-700'} mb-4`}>
+                  En smuk "Guesthouse" med spa og pool, perfekt til at slappe af inden koncerten.
+                  Stedet ligger i naturskønne omgivelser, kun en kort tur fra amfiteateret.
+                </p>
 
-        <div className="grid md:grid-cols-2 gap-4 mb-6">
-          {[
-            { name: 'Hôtel & Spa Le Petit Paradis', stars: 3, distance: '200m fra venue', price: '€€', location: 'Vienne' },
-            { name: 'Best Western Hôtel de la Pyramide', stars: 4, distance: '500m fra venue', price: '€€€', location: 'Vienne' },
-            { name: 'Ibis Budget Vienne', stars: 2, distance: '1 km fra venue', price: '€', location: 'Vienne' },
-            { name: 'Hotel i Lyon Centrum', stars: 3, distance: '30 km fra venue', price: '€€', location: 'Lyon' }
-          ].map((hotel, i) => (
-            <div key={i} className={`p-4 rounded-xl ${darkMode ? 'bg-white/5' : 'bg-white'}`}>
-              <div className="flex items-start justify-between mb-2">
-                <h3 className="font-bold">{hotel.name}</h3>
-                <span className="text-amber-500 font-bold">{hotel.price}</span>
+                <div className="grid grid-cols-2 gap-y-3 gap-x-6 mb-6">
+                  <div className="flex items-center gap-2">
+                    <Calendar className="w-4 h-4 text-amber-500" />
+                    <span className="text-sm">11. - 12. Juli 2026</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Users className="w-4 h-4 text-amber-500" />
+                    <span className="text-sm">4 Personer (Quadruple Room)</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Droplets className="w-4 h-4 text-amber-500" />
+                    <span className="text-sm">Pool & Spa</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Utensils className="w-4 h-4 text-amber-500" />
+                    <span className="text-sm">Morgenmad kan tilkøbes</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Car className="w-4 h-4 text-amber-500" />
+                    <span className="text-sm">Gratis Parkering</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Footprints className="w-4 h-4 text-amber-500" />
+                    <span className="text-sm">39 min gang til venue</span>
+                  </div>
+                </div>
+
+                <div className={`p-3 rounded-lg ${darkMode ? 'bg-green-500/10 border border-green-500/20' : 'bg-green-50 border border-green-100'}`}>
+                  <p className={`text-sm flex items-start gap-2 ${darkMode ? 'text-green-400' : 'text-green-700'}`}>
+                    <Check className="w-4 h-4 mt-0.5 flex-shrink-0" />
+                    <span>
+                      <strong>Fleksibel booking:</strong> Vi har sikret dette værelse, men det kan afbestilles gratis indtil 4. juli 2026, hvis planerne ændres (f.eks. hvis vi flyver og har brug for flere overnatninger).
+                    </span>
+                  </p>
+                </div>
               </div>
-              <div className="flex items-center gap-1 mb-2">
-                {[...Array(hotel.stars)].map((_, j) => (
-                  <Star key={j} className="w-4 h-4 text-amber-500" fill="currentColor" />
-                ))}
+              
+              <div className="w-full md:w-1/3 aspect-video md:aspect-auto rounded-xl overflow-hidden bg-gray-200">
+                {/* Fixed Map Link: Using output=embed for free access */}
+                <iframe 
+                  src="https://maps.google.com/maps?q=Maison+Mori+Vienne&t=&z=15&ie=UTF8&iwloc=&output=embed" 
+                  width="100%" 
+                  height="100%" 
+                  style={{border:0}} 
+                  allowFullScreen="" 
+                  loading="lazy" 
+                  referrerPolicy="no-referrer-when-downgrade"
+                  title="Maison Mori Map"
+                ></iframe>
               </div>
-              <p className={`text-sm ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>
-                📍 {hotel.location} · {hotel.distance}
-              </p>
+            </div>
+            
+            <div className="mt-6 flex flex-wrap gap-3">
               <a 
-                href={`https://www.booking.com/searchresults.html?ss=${encodeURIComponent(hotel.location + ' France')}&checkin=2026-07-10&checkout=2026-07-12`}
-                target="_blank"
+                href="https://www.booking.com/hotel/fr/maison-mori.html" 
+                target="_blank" 
                 rel="noopener noreferrer"
-                className="mt-3 inline-flex items-center gap-2 text-amber-500 hover:text-amber-400 text-sm font-medium"
+                className="inline-flex items-center gap-2 px-5 py-2.5 bg-amber-500 text-black font-bold rounded-lg hover:bg-amber-400 transition-colors"
               >
-                Søg på Booking.com <ExternalLink className="w-3 h-3" />
+                Se hotellet på Booking.com
+                <ExternalLink className="w-4 h-4" />
+              </a>
+              <a 
+                href="https://www.google.com/maps/dir/?api=1&origin=Maison+Mori,+611+Chemin+du+Boucon,+38200+Vienne,+France&destination=Théâtre+Antique+de+Vienne,+7+Rue+de+Goris,+38200+Vienne,+France&travelmode=walking" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className={`inline-flex items-center gap-2 px-5 py-2.5 rounded-lg border font-bold transition-colors ${darkMode ? 'border-amber-500 text-amber-500 hover:bg-amber-500/10' : 'border-amber-600 text-amber-700 hover:bg-amber-50'}`}
+              >
+                <Footprints className="w-4 h-4" />
+                Se gå-ruten på Google Maps (39 min)
               </a>
             </div>
-          ))}
+          </div>
+        </div>
+
+        <div className={`p-6 rounded-2xl ${darkMode ? 'bg-white/5' : 'bg-white'} opacity-75`}>
+          <h3 className="text-lg font-bold mb-3">Alternative overvejelser</h3>
+          <p className={`${darkMode ? 'text-gray-400' : 'text-gray-600'} text-sm`}>
+            Hvis vi beslutter at tage en længere tur (f.eks. 10.-12. juli) eller flyve, kan vi justere bookingen eller finde alternativer i Lyon. Men lige nu har vi en sikker base med plads til alle og parkering til bilen!
+          </p>
         </div>
       </Section>
 
@@ -1060,10 +1269,6 @@ export default function App() {
                   <span>Jazz à Vienne (officiel)</span>
                   <ExternalLink className="w-4 h-4 text-amber-500" />
                 </a>
-                <a href="https://vfrm.com" target="_blank" rel="noopener noreferrer" className="flex items-center justify-between p-3 rounded-lg bg-amber-500/10 hover:bg-amber-500/20 transition-colors">
-                  <span>Vulfpeck (officiel)</span>
-                  <ExternalLink className="w-4 h-4 text-amber-500" />
-                </a>
                 <a href="https://www.corywongmusic.com" target="_blank" rel="noopener noreferrer" className="flex items-center justify-between p-3 rounded-lg bg-amber-500/10 hover:bg-amber-500/20 transition-colors">
                   <span>Cory Wong</span>
                   <ExternalLink className="w-4 h-4 text-amber-500" />
@@ -1077,15 +1282,17 @@ export default function App() {
 
             {/* Personal message */}
             <div className={`p-6 rounded-2xl bg-gradient-to-br ${darkMode ? 'from-amber-900/30 to-amber-950/50' : 'from-amber-100 to-amber-200'}`}>
-              <h3 className="text-xl font-bold mb-4">💌 Personlig besked</h3>
+              <h3 className="text-xl font-bold mb-4">Tillykke med de 70 år, far! 🎸</h3>
               <div className={`${darkMode ? 'text-gray-300' : 'text-gray-700'} space-y-3`}>
-                <p>Kære Far,</p>
+                <p>Et nyt årti kalder og med det nye eventyr.</p>
                 <p>
-                  Tak for alle de år med musik, fra du lærte mig de første akkorder, 
-                  til vi har jammet sammen i garagen.
+                Som gave får du en rejse til Sydfrankrig, hvor vi sammen skal opleve Vulfpeck live i det antikke teater i Vienne den 11. juli 2026. Funk i verdensklasse under åben himmel!
                 </p>
                 <p>
-                  Nu skal vi opleve noget helt særligt sammen.
+                Måske bliver det startskuddet til at dykke ned i funk-verdenen eller bare en fed oplevelse vi kan dele sammen. Uanset hvad, glæder jeg mig helt vildt til at tage afsted med dig.
+                </p>
+                <p>
+                Jeg ser frem til denne tur og til mange fremtidige musikalske eventyr og rejser sammen med resten af familien.
                 </p>
                 <p className="font-medium">
                   Glæder mig!<br />
