@@ -147,8 +147,8 @@ export default function App() {
   const [checklist, setChecklist] = useState({});
 
   // Check if it's birthday
-  // const today = new Date(); // Normal date
-  const today = new Date('2026-01-02'); // Force Birthday for testing
+  const today = new Date(); // Normal date
+  
   const isBirthday = today.getMonth() === 0 && today.getDate() === 2;
   const birthdayDate = new Date('2026-01-02');
   const concertDate = new Date('2026-07-11');
